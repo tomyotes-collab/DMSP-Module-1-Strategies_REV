@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Strategy sort: Vietnamese brands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F5;--surface:#FFFFFF;--ink:#16213A;--muted:#566077;--line:#D3D9E3;
+  --accent:#C8221B;--accent-ink:#FFFFFF;--zone:#F6F7FA;--sel:#16213A;
+  --ok:#1C6E47;--ok-bg:#E2F2E9;--bad:#A8241D;--bad-bg:#FBE7E5;--chip:#E2E7EF;
+  color-scheme:light;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1424;--surface:#172039;--ink:#E7EBF3;--muted:#A2ABBF;--line:#2B3656;
+    --accent:#F0574E;--accent-ink:#1C0806;--zone:#131A2F;--sel:#E7EBF3;
+    --ok:#74D3A2;--ok-bg:#15362A;--bad:#FF8B82;--bad-bg:#3B1A1A;--chip:#222C4A;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1424;--surface:#172039;--ink:#E7EBF3;--muted:#A2ABBF;--line:#2B3656;
+  --accent:#F0574E;--accent-ink:#1C0806;--zone:#131A2F;--sel:#E7EBF3;
+  --ok:#74D3A2;--ok-bg:#15362A;--bad:#FF8B82;--bad-bg:#3B1A1A;--chip:#222C4A;color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+button,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 20px 48px}
+header h1{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0 0 6px;font-weight:700;letter-spacing:-0.02em}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.groups{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:22px 0 18px}
+.g{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:left;cursor:pointer}
+.g small{display:block;color:var(--muted);font-size:13px}
+.g b{font-weight:600;font-size:15px}
+.g[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.g[aria-pressed="true"] small{color:inherit;opacity:.75}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:14px}
+.intro h2{margin:0;font-size:26px;font-weight:700;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--line);margin-bottom:16px}
+.tab{background:none;border:0;padding:10px 14px;cursor:pointer;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab span{font-size:13px;margin-left:6px;opacity:.8}
+.steps{font-size:14px;color:var(--muted);margin:0 0 14px}
+.board{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.pile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;position:sticky;top:calc(12px + env(safe-area-inset-top,0px))}
+.pile h3{margin:0 0 10px;font-size:15px;font-weight:600}
+.pile .empty{color:var(--muted);font-size:14px;margin:4px 0}
+.card{display:block;width:100%;text-align:left;background:var(--zone);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:10px 12px;margin-bottom:8px;cursor:grab;font-size:14.5px;line-height:1.45}
+.card[aria-pressed="true"]{outline:3px solid var(--sel);outline-offset:1px}
+.zones{display:grid;gap:12px}
+.zones.z4{grid-template-columns:repeat(2,minmax(0,1fr))}
+.zones.z7{grid-template-columns:repeat(2,minmax(0,1fr))}
+.zone{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;min-height:130px;transition:border-color .15s}
+.zone.over{border-color:var(--accent)}
+.zone-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.zone-head h4{margin:0;font-size:17px;font-weight:700}
+.zone-head p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.place{flex:none;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer}
+.placed{background:var(--zone);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px}
+.placed p{margin:0 0 8px;font-size:14.5px;line-height:1.45}
+.placed textarea{width:100%;min-height:54px;resize:vertical;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:14px}
+.placed .row{display:flex;justify-content:flex-end;margin-top:6px}
+.link{background:none;border:0;padding:2px 0;color:var(--muted);text-decoration:underline;font-size:13px;cursor:pointer}
+.placed.ok{border-color:var(--ok);background:var(--ok-bg)}
+.placed.bad{border-color:var(--bad);background:var(--bad-bg)}
+.verdict{font-size:13.5px;margin:8px 0 0}
+.verdict b{font-weight:600}
+.ok .verdict b{color:var(--ok)}
+.bad .verdict b{color:var(--bad)}
+.foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px}
+.btn{background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.score{font-weight:600}
+.note{font-size:13px;color:var(--muted);margin-top:28px;max-width:80ch}
+@media (max-width:980px){.groups{grid-template-columns:repeat(3,minmax(0,1fr))}.board{grid-template-columns:1fr}.pile{position:static}}
+@media (max-width:620px){.groups{grid-template-columns:repeat(2,minmax(0,1fr))}.zones.z4,.zones.z7{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Strategy sort</h1>
+    <p>Each group analyses one Vietnamese brand. Match every situation card to the right strategy level, STPD step and digital P of the marketing mix, write why, then present your board to the class.</p>
+  </header>
+  <nav class="groups" id="groups" aria-label="Choose your group"></nav>
+  <div class="intro" id="intro"></div>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <p class="steps">Tap a card, then press <strong>Place here</strong> on the box where it belongs (or drag it there). Write one sentence explaining your choice. Reveal the answers only after your group has presented.</p>
+  <div class="board">
+    <aside class="pile" id="pile" aria-label="Situation cards"></aside>
+    <section class="zones" id="zones"></section>
+  </div>
+  <div class="foot" id="foot"></div>
+  <p class="note">Situations are simplified for class discussion and based on publicly known information about each brand. Some cards could be argued two ways; a well-justified alternative answer is worth discussing.</p>
+</div>
+
+<script>
+const ZONES={
+  levels:[
+    {k:'corporate',n:'Corporate',h:'Which businesses to be in and how they work together'},
+    {k:'business',n:'Business',h:'How one business competes in its market'},
+    {k:'functional',n:'Functional',h:'A department’s plan: marketing, HR, R&D, supply chain'},
+    {k:'operating',n:'Operating',h:'Day-to-day activities of a unit or team'}
+  ],
+  stpd:[
+    {k:'S',n:'Segmentation',h:'Dividing the market into groups'},
+    {k:'T',n:'Targeting',h:'Choosing which groups to serve'},
+    {k:'P',n:'Positioning',h:'How customers should see the brand'},
+    {k:'D',n:'Differentiation',h:'What makes it different from rivals'}
+  ],
+  ps:[
+    {k:'product',n:'Product',h:'Digital products, features or add-on services'},
+    {k:'price',n:'Price',h:'Online, real-time or personalised pricing'},
+    {k:'place',n:'Place',h:'Digital channels and online access'},
+    {k:'promotion',n:'Promotion',h:'Digital communication and campaigns'},
+    {k:'people',n:'People',h:'Staff, chatbots and online support'},
+    {k:'process',n:'Process',h:'The digital customer journey'},
+    {k:'physical',n:'Physical evidence',h:'Digital cues that signal quality'}
+  ]
+};
+const PARTS=[{k:'levels',n:'Strategy levels'},{k:'stpd',n:'STPD'},{k:'ps',n:'Digital 7Ps'}];
+
+const C=[
+{id:'vinfast',name:'VinFast',parent:'Part of Vingroup',blurb:'Vietnamese electric car and e-scooter maker.',
+levels:[
+ ['Vingroup links VinFast cars, V-Green charging stations and Vinhomes residential areas into one electric-vehicle ecosystem.','corporate','This is about how several businesses in the group create value together, which is a corporate decision.'],
+ ['Vingroup decides to move beyond real estate into car manufacturing, healthcare and education.','corporate','Choosing which industries the group competes in is the core corporate question.'],
+ ['VinFast chooses to compete as an affordable, smart electric car brand rather than making petrol cars.','business','This defines how one business, VinFast, competes in the car market.'],
+ ['VinFast decides to enter markets such as Indonesia and India alongside Vietnam.','business','Choosing which markets one business competes in is a business-level decision.'],
+ ['The marketing team plans to reach young urban buyers mainly through TikTok and YouTube content.','functional','A plan for one department (marketing) that supports the business strategy.'],
+ ['The HR team designs a training programme so showroom staff understand EV technology.','functional','A plan for the HR function that supports how VinFast competes.'],
+ ['Showroom staff call back every test-drive enquiry within 24 hours.','operating','A specific daily task with a clear standard, done by one unit.'],
+ ['Software engineers schedule over-the-air updates to customers’ cars overnight.','operating','A routine operational activity of the software team.']
+],
+stpd:[
+ ['Car buyers are grouped by income, life stage and whether they live in a big city or a rural area.','S','Splitting the market into groups with shared traits is segmentation.'],
+ ['The VF 3 mini SUV is aimed at young city dwellers buying their first car.','T','Choosing one specific group to serve with a model is targeting.'],
+ ['VinFast wants customers to see it as the easy, affordable way to switch to electric.','P','This describes the place VinFast wants in customers’ minds.'],
+ ['Cars receive over-the-air software updates and can be controlled through the VinFast app.','D','Concrete features that set VinFast apart from rivals are differentiation.']
+],
+ps:[
+ ['Optional paid online packages add in-car streaming and smart features to the car.','product','Digital features sold as part of the offer extend the product itself.'],
+ ['Customers compare versions, see prices and get instalment estimates online before visiting a showroom.','price','Making prices and payment options transparent online is a digital price decision.'],
+ ['Customers configure a car and pay a deposit on the website or app without visiting a showroom.','place','Selling through digital channels changes where customers can buy, which is place.'],
+ ['Social ads show a model again to people who watched its launch video on YouTube.','promotion','Retargeting viewers with digital ads is promotion.'],
+ ['An in-car AI voice assistant and an online chat team answer owners’ questions.','people','Digital assistants and online support staff are part of the people customers deal with.'],
+ ['Owners book maintenance and roadside assistance through the app instead of calling.','process','Moving service booking into the app digitalises the customer process.'],
+ ['The app keeps a digital service history and charging record for each car.','physical','Digital records reassure owners about the car’s condition, acting as physical evidence.']
+]},
+
+{id:'shopee',name:'Shopee',parent:'Part of Sea Group',blurb:'E-commerce marketplace, one of the most used shopping apps in Vietnam.',
+levels:[
+ ['Sea Group runs e-commerce (Shopee), digital payments (SeaMoney) and gaming (Garena) as one portfolio.','corporate','Managing a set of different businesses together is corporate strategy.'],
+ ['Sea Group decides how much investment to move from gaming into e-commerce and payments.','corporate','Allocating money across businesses in the portfolio is a corporate decision.'],
+ ['Shopee Vietnam chooses to compete mainly on low prices and frequent mega-sale days.','business','This sets how Shopee, as one business, wins in its market.'],
+ ['Shopee responds to TikTok Shop by investing heavily in livestream selling.','business','A competitive move by one business against its rivals is business-level.'],
+ ['The marketing team plans the 11.11 campaign budget across TV, celebrities and in-app games.','functional','A marketing department plan that supports the low-price, fun positioning.'],
+ ['The logistics function plans how to handle order volumes several times higher than normal during mega-sales.','functional','A plan for the logistics function that supports the business strategy.'],
+ ['Customer service agents must reply to chat complaints within 5 minutes during 11.11.','operating','A specific daily service standard for one unit.'],
+ ['The app team sends a flash-sale notification to users at 12:00 every day.','operating','A routine task carried out by one team.']
+],
+stpd:[
+ ['Online shoppers are grouped by price sensitivity, age and how often they shop on mobile.','S','Dividing shoppers into groups is segmentation.'],
+ ['Shopee focuses on young, price-conscious shoppers who buy mainly on their phones.','T','Choosing which group to serve is targeting.'],
+ ['Shopee wants to be seen as the cheapest and most fun place to shop online.','P','The intended image in customers’ minds is positioning.'],
+ ['Free-shipping vouchers, in-app games and livestream deals.','D','Concrete features that make Shopee different are differentiation.']
+],
+ps:[
+ ['Digital services like phone top-ups, bill payments and e-vouchers are sold inside the app.','product','Adding digital services expands what Shopee offers, which is product.'],
+ ['Prices change in real time during flash sales, and each user receives personalised vouchers.','price','Real-time and personalised pricing is digital price strategy.'],
+ ['Sellers reach buyers nationwide entirely through the app, without needing a physical shop.','place','The app itself is the sales channel, which is place.'],
+ ['Livestream selling and in-app games that reward users with coins.','promotion','Livestreams and gamified campaigns are digital promotion.'],
+ ['Chatbots answer common questions first, then pass harder cases to human agents.','people','Combining chatbots and human agents shapes the people side of service.'],
+ ['One-tap checkout with saved payment details and real-time order tracking.','process','A faster, digital checkout and tracking flow is process.'],
+ ['Star ratings, photo and video reviews, and a verified badge for official brand stores.','physical','Online cues that build trust before buying are physical evidence.']
+]},
+
+{id:'highlands',name:'Highlands Coffee',parent:'Majority-owned by Jollibee Foods Corporation',blurb:'Coffee chain with stores across Vietnam.',
+levels:[
+ ['The parent group holds Highlands Coffee alongside its other restaurant brands in different countries.','corporate','Managing a portfolio of brands across markets is corporate strategy.'],
+ ['The parent group decides whether to fund Highlands’ expansion into new countries.','corporate','Deciding where to invest across the portfolio is a corporate decision.'],
+ ['Highlands competes as an affordable, modern Vietnamese coffee brand against Starbucks and local cafés.','business','This defines how one business competes in the coffee market.'],
+ ['Highlands decides to grow through many stores in office buildings, malls and street corners.','business','A choice about how this business wins in its market.'],
+ ['The marketing team plans social media campaigns around new seasonal drinks.','functional','A marketing department plan that supports the business strategy.'],
+ ['The HR team plans how to recruit and train baristas for new stores.','functional','A plan for the HR function.'],
+ ['Each store follows a recipe card so every phin coffee tastes the same.','operating','A standard daily routine at store level.'],
+ ['Store managers schedule extra staff for the 7–9am office rush.','operating','A day-to-day staffing decision in one unit.']
+],
+stpd:[
+ ['Coffee drinkers are grouped by occasion: quick takeaway, meeting friends or studying.','S','Dividing customers by usage occasion is segmentation.'],
+ ['Highlands focuses on young urban office workers and students.','T','Choosing which groups to serve is targeting.'],
+ ['Highlands wants to be seen as the modern Vietnamese coffee brand at an everyday price.','P','The intended image in customers’ minds is positioning.'],
+ ['Vietnamese-style drinks like phin coffee, with stores in highly visible locations.','D','Concrete points that set Highlands apart are differentiation.']
+],
+ps:[
+ ['Digital gift cards and e-vouchers that customers can send to friends by phone.','product','A digital version of the offer extends the product.'],
+ ['Delivery-app promotions and app-only discounts that change by time of day.','price','Time-based and channel-specific discounts are digital pricing.'],
+ ['Orders through GrabFood and ShopeeFood reach customers who never visit a store.','place','Delivery apps are digital distribution channels, which is place.'],
+ ['Short TikTok videos and influencer posts announce new seasonal drinks.','promotion','Social video and influencer content is digital promotion.'],
+ ['Staff complete short online training modules before a new drink launches.','people','Digital tools used to train and support staff are part of people.'],
+ ['Customers order ahead in an app and pick up without queuing.','process','Ordering ahead digitally changes the customer process.'],
+ ['Store photos, Google Maps reviews and the brand’s social media feed show the experience before customers visit.','physical','Online images and reviews act as physical evidence before the visit.']
+]},
+
+{id:'vinamilk',name:'Vinamilk',parent:'Vietnam Dairy Products JSC',blurb:'Vietnam’s largest dairy company.',
+levels:[
+ ['Vinamilk owns dairy farms, factories and overseas subsidiaries and manages them as one group.','corporate','Deciding how a portfolio of units fits together is corporate strategy.'],
+ ['Vinamilk decides how to split investment between its Vietnamese and overseas businesses.','corporate','Allocating resources across businesses is a corporate decision.'],
+ ['Vinamilk’s dairy business competes on trust and quality against foreign milk brands.','business','This sets how one business wins in its market.'],
+ ['Vinamilk refreshes its brand image to appeal to younger consumers.','business','Repositioning the business to stay competitive is a business-level move.'],
+ ['The R&D team plans new products such as low-sugar and plant-based milk.','functional','A plan for the R&D function.'],
+ ['The marketing team decides to use digital videos and school programmes to reach families.','functional','A marketing department plan.'],
+ ['Factory staff run quality checks on every production batch.','operating','A routine daily activity in one unit.'],
+ ['Sales reps visit grocery stores weekly to check stock and shelf displays.','operating','A specific recurring task for the sales unit.']
+],
+stpd:[
+ ['The market is split by age and health needs: children, adults, older people and pregnant women.','S','Dividing the market into groups is segmentation.'],
+ ['Separate product lines are aimed at children, adults and older people.','T','Choosing several groups to serve with different offers is targeting.'],
+ ['Vinamilk wants to be seen as the trusted Vietnamese brand for family nutrition.','P','The intended image in customers’ minds is positioning.'],
+ ['A wide range from formula milk to products for older people, backed by a long-established national brand.','D','What sets Vinamilk apart from rivals is differentiation.']
+],
+ps:[
+ ['An online nutrition tool helps parents choose the right milk for their child’s age.','product','A digital advice service adds value around the physical product.'],
+ ['Online-only bundle deals and subscription discounts on e-commerce stores.','price','Prices designed for digital channels are digital pricing.'],
+ ['Official stores on Shopee, Lazada and TikTok Shop, plus Vinamilk’s own online shop.','place','E-commerce platforms are digital distribution channels, which is place.'],
+ ['Targeted YouTube and Facebook videos for parents, based on their child’s age group.','promotion','Targeted digital ads are promotion.'],
+ ['Nutrition experts host livestream Q&A sessions with parents.','people','Experts reaching customers through livestreams are part of people.'],
+ ['Customers reorder their usual products online and receive home delivery on a regular schedule.','process','A digital reorder and subscription flow is process.'],
+ ['A QR code on the pack lets customers check product origin and freshness information.','physical','Digital proof of quality linked to the pack is physical evidence.']
+]},
+
+{id:'momo',name:'MoMo',parent:'Operated by M_Service',blurb:'E-wallet and payments super app.',
+levels:[
+ ['The company expands from payments into lending, insurance and investment products with partners.','corporate','Deciding which new business areas to enter is corporate strategy.'],
+ ['The company decides to partner with banks and insurers rather than becoming a bank itself.','corporate','A decision about the shape of the overall portfolio is corporate.'],
+ ['MoMo competes as an all-in-one super app for everyday payments.','business','This defines how the payments business competes.'],
+ ['MoMo competes with bank apps by focusing on convenience and rewards.','business','A competitive choice for one business is business-level.'],
+ ['The marketing team plans Tết lucky-money campaigns in the app.','functional','A marketing department plan.'],
+ ['The risk team sets policies to detect fraud across the platform.','functional','A plan for the risk function.'],
+ ['Support staff reply to failed-transaction complaints within a set time.','operating','A daily service standard for one unit.'],
+ ['The tech team runs system checks before peak payment times such as payday.','operating','A routine task for one team.']
+],
+stpd:[
+ ['Users are grouped by age, income and what they pay for: bills, shopping or transfers.','S','Dividing users into groups is segmentation.'],
+ ['MoMo focuses on young, smartphone-first users who want cashless payments.','T','Choosing which group to serve is targeting.'],
+ ['MoMo wants to be seen as the easiest way to pay for anything in daily life.','P','The intended image in users’ minds is positioning.'],
+ ['Many services in one app, plus rewards and fun campaigns that bank apps rarely offer.','D','What sets MoMo apart from rivals is differentiation.']
+],
+ps:[
+ ['New services such as insurance and small loans run entirely inside the app.','product','Adding fully digital services expands the product.'],
+ ['Personalised vouchers and cashback based on each user’s spending habits.','price','Pricing tailored to individual data is digital pricing.'],
+ ['QR codes let small street shops accept MoMo payments without card machines.','place','QR payments extend where the service is available, which is place.'],
+ ['Tết lucky-money games encourage users to invite friends to the app.','promotion','Gamified, shareable campaigns are digital promotion.'],
+ ['An in-app chatbot handles common questions, with human agents for complex problems.','people','Chatbots and support agents form the people side of the service.'],
+ ['Paying a bill takes a few taps, confirmed with face ID or fingerprint.','process','A fast, secure digital payment flow is process.'],
+ ['The digital receipt and transaction history act as proof of payment.','physical','Digital receipts reassure users the service worked, acting as physical evidence.']
+]},
+
+{id:'mwg',name:'Thế Giới Di Động',parent:'Part of Mobile World Group (MWG)',blurb:'Phone and electronics retailer.',
+levels:[
+ ['MWG runs Thế Giới Di Động, Điện Máy Xanh, Bách Hóa Xanh and An Khang pharmacy as one portfolio.','corporate','Managing several retail chains together is corporate strategy.'],
+ ['MWG decides how much to invest in its grocery chain compared with its electronics chains.','corporate','Allocating money across businesses is a corporate decision.'],
+ ['Thế Giới Di Động competes on wide choice of phones, trusted service and fast delivery.','business','This sets how one chain wins in its market.'],
+ ['Bách Hóa Xanh competes as the convenient neighbourhood store for fresh food.','business','How one chain competes in its own market is business-level.'],
+ ['The marketing team plans online-first campaigns for new iPhone launches.','functional','A marketing department plan.'],
+ ['The supply chain team plans how to stock phones across stores nationwide.','functional','A plan for the supply chain function.'],
+ ['Store staff follow a checklist when setting up a new phone for a customer.','operating','A routine in-store task with a set standard.'],
+ ['Delivery staff must bring online orders to the customer within the promised time.','operating','A daily operational standard for one unit.']
+],
+stpd:[
+ ['Phone buyers are grouped by budget, brand preference and how they like to pay.','S','Dividing buyers into groups is segmentation.'],
+ ['The chain focuses on mass-market buyers in cities and provinces across the country.','T','Choosing which groups to serve is targeting.'],
+ ['It wants to be seen as the trusted, convenient place to buy a phone anywhere in Vietnam.','P','The intended image in customers’ minds is positioning.'],
+ ['Stores almost everywhere, instalment plans and strong after-sales warranty service.','D','What sets the chain apart from rivals is differentiation.']
+],
+ps:[
+ ['Customers add screen insurance or an extended warranty online when buying a phone.','product','Digital add-on services extend the product offer.'],
+ ['Online flash deals and an instalment calculator on every product page.','price','Showing deals and payment options online is digital pricing.'],
+ ['Customers order on the website and choose home delivery or pick-up at the nearest store.','place','Linking online orders with stores is an omnichannel place decision.'],
+ ['Online pre-order campaigns and search ads when a new iPhone launches.','promotion','Search ads and online pre-orders are digital promotion.'],
+ ['Online consultants answer product questions through live chat and Zalo.','people','Staff supporting customers online are part of people.'],
+ ['Customers track their order online and receive SMS updates until delivery.','process','Digital tracking and notifications shape the customer process.'],
+ ['Product videos, detailed photos and customer reviews on each product page.','physical','Online content that shows quality before buying is physical evidence.']
+]}
+];
+
+const SKEY='strategy-sort-v1';
+let st={co:0,part:'levels',place:{},why:{},shown:{}};
+try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s&&s.place)st=Object.assign(st,s)}catch(e){}
+let sel=null;
+
+function save(){try{localStorage.setItem(SKEY,JSON.stringify(st))}catch(e){}}
+function k(){return C[st.co].id+'|'+st.part}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function hash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}h^=h>>>15;h=Math.imul(h,2246822507);h^=h>>>13;h=Math.imul(h,3266489909);h^=h>>>16;return h>>>0}
+function cards(){return C[st.co][st.part]}
+function order(){const key=k();return cards().map((_,i)=>i).sort((a,b)=>hash(key+'#'+a)-hash(key+'#'+b))}
+function zoneName(z){return ZONES[st.part].find(x=>x.k===z).n}
+
+function render(){
+  const co=C[st.co];
+  document.getElementById('groups').innerHTML=C.map((c,i)=>
+    `<button class="g" data-a="co" data-i="${i}" aria-pressed="${i===st.co}"><small>Group ${i+1}</small><b>${esc(c.name)}</b></button>`).join('');
+  document.getElementById('intro').innerHTML=`<h2>${esc(co.name)}</h2><p>${esc(co.parent)}. ${esc(co.blurb)}</p>`;
+  document.getElementById('tabs').innerHTML=PARTS.map(p=>{
+    const key=co.id+'|'+p.k,pl=st.place[key]||{},n=Object.keys(pl).length,t=co[p.k].length;
+    return `<button class="tab" role="tab" data-a="part" data-p="${p.k}" aria-selected="${p.k===st.part}">${p.n}<span>${n}/${t}</span></button>`}).join('');
+  const key=k(),pl=st.place[key]||{},why=st.why[key]||{},shown=!!st.shown[key];
+  const left=order().filter(i=>pl[i]===undefined);
+  document.getElementById('pile').innerHTML=`<h3>Situation cards (${left.length} left)</h3>`+
+    (left.length?left.map(i=>`<button class="card" draggable="true" data-a="sel" data-i="${i}" aria-pressed="${sel===i}">${esc(cards()[i][0])}</button>`).join('')
+    :`<p class="empty">All cards placed. Check your reasons, then present your board.</p>`);
+  const zs=ZONES[st.part];
+  const zEl=document.getElementById('zones');
+  zEl.className='zones '+(zs.length===4?'z4':'z7');
+  zEl.innerHTML=zs.map(z=>{
+    const items=order().filter(i=>pl[i]===z.k).map(i=>{
+      const c=cards()[i],right=c[1]===z.k,cls=shown?(right?'ok':'bad'):'';
+      const v=shown?`<p class="verdict"><b>${right?'Correct.':'Not quite.'}</b> ${right?'':'This belongs in '+esc(zoneName(c[1]))+'. '}${esc(c[2])}</p>`:'';
+      return `<div class="placed ${cls}"><p>${esc(c[0])}</p>
+        <textarea data-i="${i}" aria-label="Why this card belongs in ${esc(z.n)}" placeholder="Why does this belong here?">${esc(why[i]||'')}</textarea>
+        ${v}<div class="row"><button class="link" data-a="back" data-i="${i}">Move back to cards</button></div></div>`}).join('');
+    return `<div class="zone" data-z="${z.k}"><div class="zone-head"><div><h4>${z.n}</h4><p>${z.h}</p></div>
+      ${sel!==null?`<button class="place" data-a="put" data-z="${z.k}">Place here</button>`:''}</div>${items}</div>`}).join('');
+  const total=cards().length,placed=Object.keys(pl).length;
+  const correct=Object.entries(pl).filter(([i,z])=>cards()[i][1]===z).length;
+  document.getElementById('foot').innerHTML=
+    (shown?`<button class="btn ghost" data-a="hide">Hide answers</button><span class="score">${correct} of ${total} correct</span>`
+      :`<button class="btn" data-a="reveal" ${placed<total?'disabled style="opacity:.5;cursor:not-allowed"':''}>Reveal answers</button>
+        <span style="color:var(--muted);font-size:14px">${placed<total?'Place all '+total+' cards to unlock answers.':'Reveal after your group has presented.'}</span>`)+
+    `<button class="btn ghost" data-a="reset" style="margin-left:auto">Clear this section</button>`;
+}
+
+function put(i,z){const key=k();(st.place[key]=st.place[key]||{})[i]=z;sel=null;save();render()}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+  if(a==='co'){st.co=+b.dataset.i;sel=null}
+  else if(a==='part'){st.part=b.dataset.p;sel=null}
+  else if(a==='sel'){const i=+b.dataset.i;sel=sel===i?null:i}
+  else if(a==='put'&&sel!==null){return put(sel,b.dataset.z)}
+  else if(a==='back'){const key=k();delete(st.place[key]||{})[+b.dataset.i]}
+  else if(a==='reveal'){st.shown[k()]=true}
+  else if(a==='hide'){st.shown[k()]=false}
+  else if(a==='reset'){if(!confirm('Clear all placed cards and reasons in this section?'))return;const key=k();delete st.place[key];delete st.why[key];delete st.shown[key];sel=null}
+  save();render();
+});
+document.addEventListener('input',e=>{
+  if(e.target.tagName!=='TEXTAREA')return;const key=k();(st.why[key]=st.why[key]||{})[e.target.dataset.i]=e.target.value;save();
+});
+document.addEventListener('dragstart',e=>{const c=e.target.closest('.card');if(!c)return;sel=+c.dataset.i;e.dataTransfer.setData('text/plain',c.dataset.i)});
+document.addEventListener('dragover',e=>{const z=e.target.closest('.zone');if(!z)return;e.preventDefault();z.classList.add('over')});
+document.addEventListener('dragleave',e=>{const z=e.target.closest('.zone');if(z)z.classList.remove('over')});
+document.addEventListener('drop',e=>{const z=e.target.closest('.zone');if(!z)return;e.preventDefault();const i=+e.dataTransfer.getData('text/plain');put(i,z.dataset.z)});
+render();
+</script>
+</body>
+</html>
